@@ -78,9 +78,76 @@ def transfer_money(debit_account, credit_account, amount):
     finally:
         if con is not None:
             con.close()
+
+
+
+
+
+def create_images():
+    con = None
+    try:
+        con = psycopg2.connect(**config())
+        cursor = con.cursor()
+        SQL = """
+        DROP TABLE IF EXISTS images;
+        CREATE TABLE images (
+            image_id SERIAL PRIMARY KEY,
+            name VARCHAR(255),
+            image_data BYTEA
+        );
+        """
+        cursor.execute(SQL)
+        con.commit()
+        print("New table created successfully")
+
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if con is not None:
+            con.close()
+
+def insert_image(name, file_path):
+    with psycopg2.connect(**config()) as con:
+        with con.cursor() as cursor:
+            with open(file_path, 'rb') as file:
+                binary_data = file.read()
+            SQL = "INSERT INTO images (name, image_data) VALUES (%s, %s)"
+            cursor.execute(SQL, (name, binary_data))
+            con.commit()
+
+def retrieve_image(name, output_file_path):
+    """
+    Retrieves an image from the database and writes it to a file.
+    
+    Args:
+        name (str): The name of the image to retrieve.
+        output_file_path (str): The path to save the retrieved image.
+    """
+    with psycopg2.connect(**config()) as con:
+        with con.cursor() as cursor:
+            # SQL query to fetch the image binary data from the database by name
+            SQL = "SELECT image_data FROM images WHERE name = %s"
+            cursor.execute(SQL, (name,))
+            result = cursor.fetchone()
+            
+            if result is None:
+                print(f"Error: Image with name '{name}' not found.")
+            else:
+                # The image data is in the first column of the result
+                image_data = result[0]
+                
+                # Write the binary data to a file
+                with open(output_file_path, 'wb') as file:
+                    file.write(image_data)
+                print(f"Image saved to {output_file_path}")
+
+
+
 if __name__ == '__main__':
-    # Uncomment function calls to execute them
 
     create_accounts()
     insert_account('400001-4679876', 2, 10000)
     transfer_money('400001-4679876', '400001-467934', 100)
+    create_images()
+    insert_image("doggo", "src/data/doggo.jpg")
+    retrieve_image("doggo" "doggo.jpg")

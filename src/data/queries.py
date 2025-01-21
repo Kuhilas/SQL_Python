@@ -21,7 +21,7 @@ def q_person():
 def q_pcolumns():
     try:
         with psycopg2.connect(**config()) as con:
-            with con.cursor() as cursor:  # Use context manager for cursor as well
+            with con.cursor() as cursor: 
                 SQL = 'SELECT * FROM person;'
                 cursor.execute(SQL)
                 columns = [desc[0] for desc in cursor.description]
@@ -33,7 +33,7 @@ def q_pcolumns():
 def q_certificates():
     try:
         with psycopg2.connect(**config()) as con:
-            with con.cursor() as cursor:  # Use context manager for cursor as well
+            with con.cursor() as cursor: 
                 SQL = 'SELECT * FROM certificates;'
                 cursor.execute(SQL)
                 columns = [desc[0] for desc in cursor.description]
@@ -49,7 +49,7 @@ def q_certificates():
 def q_avg_age_person():
     try:
         with psycopg2.connect(**config()) as con:
-            with con.cursor() as cursor:  # Use context manager for cursor as well
+            with con.cursor() as cursor:
                 SQL = 'SELECT avg(age) FROM person;'
                 cursor.execute(SQL)
                 rows = cursor.fetchone()[0]
@@ -63,12 +63,10 @@ def insert_certificate(cert_id, cert_name, person_id):
     try:
         with psycopg2.connect(**config()) as con:
             with con.cursor() as cursor:
-                 # Define the SQL query for inserting a certificates into the 'certificate' table
                 SQL = """
                     INSERT INTO certificates (id, name, person_id)
                     VALUES (%s, %s, %s);
                 """                
-                # Execute the query with the provided parameters
                 cursor.execute(SQL, (cert_id, cert_name, person_id))
 
     except psycopg2.Error as error:  
@@ -167,4 +165,3 @@ if __name__ == '__main__':
     delete_person(4)    # Deletes person with id=4
     delete_certificate(2)  # Deletes certificate with id=2
 
-    
